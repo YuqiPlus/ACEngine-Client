@@ -16,6 +16,21 @@ pip install git+https://github.com/YuqiPlus/ACEngine-Client.git
 pip install -e .
 ```
 
+
+## 卸载
+
+无论是从 GitHub 安装，还是本地开发安装，卸载时都使用包名 `ace-engine-sdk`：
+
+```bash
+pip uninstall ace-engine-sdk
+```
+
+如果不确定是否已经安装，可以先查看：
+
+```bash
+pip show ace-engine-sdk
+```
+
 ## 快速开始
 
 ```python
