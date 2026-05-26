@@ -10,12 +10,53 @@ ACEngine Client SDK 是一个用于调用 AceEngine 图像质量评价服务的 
 pip install git+https://github.com/YuqiPlus/ACEngine-Client.git
 ```
 
+如果 HTTPS 连接 GitHub 失败，可以改用 SSH 安装：
+
+```bash
+pip install git+ssh://git@github.com/YuqiPlus/ACEngine-Client.git
+```
+
+也可以指定 `main` 分支：
+
+```bash
+pip install git+ssh://git@github.com/YuqiPlus/ACEngine-Client.git@main
+```
+
 本地开发安装：
 
 ```bash
 pip install -e .
 ```
 
+## 安装失败排查
+
+如果出现类似下面的报错：
+
+```text
+fatal: unable to access 'https://github.com/...': OpenSSL SSL_connect: SSL_ERROR_SYSCALL in connection to github.com:443
+```
+
+这通常是本机网络、代理、证书或 GitHub HTTPS 连接问题，不是 SDK 包代码问题。可以优先尝试 SSH 安装：
+
+```bash
+pip install git+ssh://git@github.com/YuqiPlus/ACEngine-Client.git
+```
+
+如果需要确认 SSH 是否可用：
+
+```bash
+ssh -T git@github.com
+```
+
+如果必须使用 HTTPS，并且本机需要代理，请先配置代理后再安装。PowerShell 示例：
+
+```powershell
+$env:HTTPS_PROXY="http://127.0.0.1:7890"
+$env:HTTP_PROXY="http://127.0.0.1:7890"
+pip install git+https://github.com/YuqiPlus/ACEngine-Client.git
+```
+
+其中 `7890` 需要替换成本机实际代理端口。
 
 ## 卸载
 
