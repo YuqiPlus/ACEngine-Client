@@ -4,10 +4,16 @@ ACEngine Client SDK 是一个用于调用 AceEngine 图像质量评价服务的 
 
 ## 安装
 
-从 GitHub 仓库安装：
+从 GitHub 仓库安装最新版：
 
 ```bash
 pip install git+https://github.com/YuqiPlus/ACEngine-Client.git
+```
+
+安装指定版本：
+
+```bash
+pip install git+https://github.com/YuqiPlus/ACEngine-Client.git@v0.1.0
 ```
 
 如果 HTTPS 连接 GitHub 失败，可以改用 SSH 安装：
@@ -16,10 +22,10 @@ pip install git+https://github.com/YuqiPlus/ACEngine-Client.git
 pip install git+ssh://git@github.com/YuqiPlus/ACEngine-Client.git
 ```
 
-也可以指定 `main` 分支：
+SSH 安装指定版本：
 
 ```bash
-pip install git+ssh://git@github.com/YuqiPlus/ACEngine-Client.git@main
+pip install git+ssh://git@github.com/YuqiPlus/ACEngine-Client.git@v0.1.0
 ```
 
 本地开发安装：
@@ -48,12 +54,10 @@ pip install git+ssh://git@github.com/YuqiPlus/ACEngine-Client.git
 ssh -T git@github.com
 ```
 
-如果必须使用 HTTPS，并且本机需要代理，请先配置代理后再安装。PowerShell 示例：
+如果必须使用 HTTPS，并且本机需要代理，可以直接给 pip 指定代理：
 
 ```powershell
-$env:HTTPS_PROXY="http://127.0.0.1:7890"
-$env:HTTP_PROXY="http://127.0.0.1:7890"
-pip install git+https://github.com/YuqiPlus/ACEngine-Client.git
+pip install --proxy http://127.0.0.1:7890 git+https://github.com/YuqiPlus/ACEngine-Client.git
 ```
 
 其中 `7890` 需要替换成本机实际代理端口。
