@@ -26,7 +26,7 @@
 
 1. 核对版本号、CHANGELOG 与构建内容，确保 SDK 和 `.github/workflows/publish.yml` 已配套提交到 `main`。
 2. 在 GitHub Actions 选择 **Publish to PyPI** → **Run workflow**，分支选择 `main`，版本填写 `0.2.0`。
-3. 流程测试 Python 3.9、3.12、3.14；构建 wheel 与源码包，并严格检查元数据。指定版本必须与已安装包版本、`ace_engine.__version__` 一致。
+3. 流程在固定的 Ubuntu 24.04 环境测试 Python 3.9、3.12、3.14，避免 `ubuntu-latest` 升级导致旧版 Python 无法安装；构建 wheel 与源码包，并严格检查元数据。指定版本必须与已安装包版本、`ace_engine.__version__` 一致。
 4. 校验全部通过后，单独的发布任务通过 `pypi` 环境上传到正式 PyPI。工作流只接受手动触发，普通 push 和 PR 不会发布；在其他分支手动运行也不会进入发布。
 5. 打开 https://pypi.org/project/ace-engine-sdk/0.2.0/ ，并在干净环境执行：
 
@@ -36,6 +36,8 @@ python -c "from ace_engine import AceClient, __version__; print(__version__)"
 ```
 
 6. 确认安装可用后，再更新网站的待发布标记和安装说明。网站发布另行安排，SDK 上传不会部署网站或模型服务。
+
+若修改工作流后重新发布，请从 `main` 点击 **Run workflow** 创建新运行。旧失败记录的 **Re-run jobs** 使用原提交的工作流，不会采用后续修复。
 
 ## 本地发布前检查
 
