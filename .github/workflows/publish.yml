@@ -1,0 +1,96 @@
+name: Publish to PyPI
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Package version to publish (must match the source)
+        required: true
+        default: '0.2.0'
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pypi-publish
+  cancel-in-progress: false
+
+jobs:
+  test:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.9', '3.12', '3.14']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install SDK
+        run: python -m pip install .
+      - name: Run isolated protocol tests
+        run: python -m unittest discover -s tests -v
+
+  build:
+    if: github.ref == 'refs/heads/main'
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'
+      - name: Install build tools and SDK
+        run: python -m pip install build twine .
+      - name: Check package identity and requested version
+        env:
+          SDK_RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          python - <<'PYCODE'
+          import importlib.metadata as metadata
+          import os
+          import ace_engine
+          from packaging.version import Version
+          expected = os.environ['SDK_RELEASE_VERSION']
+          assert str(Version(expected)) == expected, 'Use a canonical version'
+          assert metadata.metadata('ace-engine-sdk')['Name'] == 'ace-engine-sdk'
+          assert metadata.version('ace-engine-sdk') == ace_engine.__version__ == expected
+          PYCODE
+      - name: Build and check distributions
+        run: |
+          python -m build
+          python -m twine check --strict dist/*
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: python-package-${{ github.sha }}
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 5
+
+  publish:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/ace-engine-sdk
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: python-package-${{ github.sha }}
+          path: dist/
+      - name: Upload to PyPI with Trusted Publishing
+        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
+        with:
+          packages-dir: dist/
+          attestations: true
+          skip-existing: false

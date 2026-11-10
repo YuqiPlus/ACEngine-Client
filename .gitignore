@@ -29,3 +29,5 @@ ENV/
 .ruff_cache/
 .coverage
 htmlcov/
+# Private verification state
+.local/
