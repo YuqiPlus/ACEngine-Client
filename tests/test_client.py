@@ -188,7 +188,7 @@ class ClientTest(unittest.TestCase):
 
     def test_original_constructor_alias_and_api_prefix_do_not_duplicate(self):
         self.assertIs(Client, AceClient)
-        self.assertEqual(__version__, "0.2.0")
+        self.assertEqual(__version__, "0.2.1")
         with AceClient(self.url + "/ibt/", access_key_id=KEY, access_key_secret=SECRET) as c:
             c.session.trust_env = False
             self.assertEqual(c.api_url, self.url + "/ibt")

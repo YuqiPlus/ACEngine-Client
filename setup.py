@@ -6,7 +6,7 @@ with (Path(__file__).parent / "README.md").open("r", encoding="utf-8") as fh:
 
 setup(
     name="ace-engine-sdk",
-    version="0.2.0",
+    version="0.2.1",
     author="YuqiPlus",
     author_email="silverwjq@163.com",
     description="AceEngine image quality evaluation SDK",

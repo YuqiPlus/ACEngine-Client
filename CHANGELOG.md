@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1
+
+- Update the user guide with direct pip installation and move source setup, repository scripts, and development checks to CONTRIBUTING.md.
+- Align package metadata, runtime version, and the manual publishing workflow with version 0.2.1. SDK runtime behavior is unchanged.
+
 ## 0.2.0
 
 - MNet and ICAA17K use the managed private-asset and inference endpoints by default; an uploaded asset can be reused, and `legacy=True` explicitly selects the compatibility file endpoint.

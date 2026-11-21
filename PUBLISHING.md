@@ -25,13 +25,13 @@
 ## 发布版本
 
 1. 核对版本号、CHANGELOG 与构建内容，确保 SDK 和 `.github/workflows/publish.yml` 已配套提交到 `main`。
-2. 在 GitHub Actions 选择 **Publish to PyPI** → **Run workflow**，分支选择 `main`，版本填写 `0.2.0`。
+2. 在 GitHub Actions 选择 **Publish to PyPI** → **Run workflow**，分支选择 `main`，版本填写 `0.2.1`。Git tag 不会自动修改包版本；发布前先确认 `setup.py` 和 `ace_engine/__init__.py` 中的版本一致。
 3. 流程在固定的 Ubuntu 24.04 环境测试 Python 3.9、3.12、3.14，避免 `ubuntu-latest` 升级导致旧版 Python 无法安装；构建 wheel 与源码包，并严格检查元数据。指定版本必须与已安装包版本、`ace_engine.__version__` 一致。
 4. 校验全部通过后，单独的发布任务通过 `pypi` 环境上传到正式 PyPI。工作流只接受手动触发，普通 push 和 PR 不会发布；在其他分支手动运行也不会进入发布。
-5. 打开 https://pypi.org/project/ace-engine-sdk/0.2.0/ ，并在干净环境执行：
+5. 打开 https://pypi.org/project/ace-engine-sdk/0.2.1/ ，并在干净环境执行：
 
 ```bash
-python -m pip install --index-url https://pypi.org/simple ace-engine-sdk==0.2.0
+python -m pip install --index-url https://pypi.org/simple ace-engine-sdk==0.2.1
 python -c "from ace_engine import AceClient, __version__; print(__version__)"
 ```
 
@@ -44,7 +44,7 @@ python -c "from ace_engine import AceClient, __version__; print(__version__)"
 ```bash
 python -m unittest discover -s tests -v
 python -m build
-python -m twine check --strict dist/ace_engine_sdk-0.2.0*
+python -m twine check --strict dist/ace_engine_sdk-0.2.1*
 ```
 
 测试不调用实际模型，不需要业务 API-Key。发布校验通过不等于已经上传；只有正式上传成功后，别人才能通过 `pip install ace-engine-sdk` 获取发行包。后续有代码变化时递增版本并重新构建，不能覆盖已经上传的同名文件。
