@@ -2,39 +2,21 @@
 
 用于调用 ACE 美学计算服务的 Python SDK。支持 MNet / ICAA17K 的私有资源调用、IQA 图片/视频异步任务，以及现有单项评分和图像/视频处理接口。
 
-本文档对应 **SDK 0.2.0**，需要 Python 3.9 或更新版本。发行状态以 PyPI 和 GitHub 的实际版本为准；尚未发布的改动请使用本地源码安装。维护者首次发布步骤见 [PUBLISHING.md](PUBLISHING.md)。
+需要 Python 3.9 或更新版本。
 
 ## 安装
 
-发布到 PyPI 后，用户可以直接安装：
-
 ```bash
-pip install ace-engine-sdk
+python -m pip install ace-engine-sdk
 ```
 
-```bash
-# GitHub 主分支
-pip install --upgrade git+https://github.com/YuqiPlus/ACEngine-Client.git
-
-# 本地开发
-pip install -e .
-
-# 已有的 0.1.0 标签（不含本轮新功能）
-pip install git+https://github.com/YuqiPlus/ACEngine-Client.git@v0.1.0
-```
-
-HTTPS 不通时可以使用 SSH（需要已经配置 GitHub SSH 密钥）：
+升级到最新版本：
 
 ```bash
-pip install git+ssh://git@github.com/YuqiPlus/ACEngine-Client.git
+python -m pip install --upgrade ace-engine-sdk
 ```
 
-代理、证书和网络连接由本机配置，不在 SDK 中固定代理地址，也不关闭 HTTPS 证书验证。卸载包名为 `ace-engine-sdk`：
-
-```bash
-pip show ace-engine-sdk
-pip uninstall ace-engine-sdk
-```
+安装后的导入名称为 `ace_engine`。
 
 ## 快速开始
 
@@ -67,8 +49,6 @@ with AceClient(
 ```
 
 默认服务为 `https://ace-aesthetics.cn`，接口前缀为 `/ibt`。`base_url` 也接受 `https://ace-aesthetics.cn/ibt`，不会重复拼接前缀。自建网关可以配置 `base_url` 和 `api_prefix`；只有直接连接不带统一前缀的网关时才使用 `api_prefix=""`。
-
-旧的三参数构造 `AceClient(base_url, access_key_id, sign)` 继续可用，`sign` 是 `access_key_secret` 的兼容名称。两者同时传入时必须一致。`from ace_engine import Client` 也是同一客户端的别名。
 
 ## 上传一次，调用多个模型
 
@@ -111,7 +91,7 @@ except AceError as error:
     # 不要因超时直接换一个新 key。
 ```
 
-SDK **不自动重试模型 POST，不在错误后自动换旧接口重发**。MNet / ICAA 的服务端负责幂等、结算和余额检查；SDK 透传其 `costCents` 等实际字段，不估算费用、不伪造结果。`replayed=True` 表示服务端返回此前调用的结果，不是一次新的计费意图。
+SDK **不会自动重试模型调用**。MNet / ICAA17K 的响应包含服务端返回的 `costCents` 等计费字段。`replayed=True` 表示返回同一次调用的已有结果，不会再次计费。
 
 默认 `raise_for_errors=False`，兼容 0.1 的字典返回方式，调用方应检查 `code` / `success`。HTTP 和业务错误保留原始业务码、说明、请求编号和 HTTP 状态（`httpStatus`）。本地或网络错误使用 `errorType` 区分。
 
@@ -157,7 +137,7 @@ response = client.wait_iqa_task(task_id, wait_timeout=600, poll_interval=2)
 
 MNet/ICAA 的资源与 IQA 的资源是不同接口管理的资源，不能混用 ID。IQA 输出可能包含短期签名图片/CSV/视频链接；保留签名参数，失效后重新查询任务，SDK 不向这些链接转发账户凭证。
 
-`get_iqa_config()` 读取配置；`configure_iqa(config)` 显式提交服务端要求的完整权重/阈值对象。`iqa()` 不会暗中修改账户默认设置，也不支持旧网页中曾出现但服务端并无对应参数的 `weights={...}` 用法。
+`get_iqa_config()` 读取当前配置；`configure_iqa(config)` 用于更新完整的权重和阈值配置。单次 `iqa()` 调用不修改账户默认设置。
 
 ## 兼容的单项文件接口
 
@@ -177,7 +157,7 @@ MNet/ICAA 的资源与 IQA 的资源是不同接口管理的资源，不能混�
 | `physique(path)` / `paa(path)` | 体态评价 |
 | `human(path)` | 人像评价 |
 
-这些接口使用 API-Key 表单鉴权，保留服务端各自的数据字段，不统一捏造成 `{score, level}`。实际可用性取决于部署的模型服务、凭证权限和余额。
+这些接口使用 API-Key 鉴权，响应结构随模型而异。调用需要相应的模型权限及账户余额。
 
 MNet / ICAA 默认走新资源接口；只有明确连接旧版服务时才使用 `client.mnet(path, legacy=True)` 或 `client.icaa17k(path, legacy=True)`。普通单项文件接口没有统一幂等保障，超时后不能盲目重发；SDK 不自动重试。
 
@@ -204,15 +184,6 @@ result = client.videomamba("clip.mp4", query="a person running")
 
 已有有效普通用户 JWT 时，可使用 `AceClient(token=token)` 访问新资源、模型调用和正式 IQA 任务接口。SDK 不负责登录、验证码或刷新令牌。API-Key 与 JWT 必须选择一种，不能混传；旧的单项文件接口需要 API-Key，不自动切换鉴权身份。
 
-## 命令行示例与验证
+## 反馈问题
 
-```bash
-python test_my_sdk.py photo.png --model mnet
-python test_my_sdk.py photo.png --model icaa17k --idempotency-key your-persisted-key
-python test_my_sdk.py photo.png --model iqa --selections exposure noise
-
-python -m unittest discover -s tests -v
-python -m build
-```
-
-`ACE_ENGINE_BASE_URL`、`ACE_ENGINE_API_PREFIX`、`ACE_ENGINE_ACCESS_KEY_ID`、`ACE_ENGINE_ACCESS_KEY_SECRET`（兼容 `ACE_ENGINE_SIGN`）及 `ACE_ENGINE_TOKEN` 可供示例程序使用。测试使用隔离的本机 HTTP 服务，不依赖真实密钥、不执行模型、不产生费用。实际联调需另用测试账号核对模型、状态和账单，不能用传输测试代替真实验证。
+遇到安装或调用问题，请在 [GitHub Issues](https://github.com/YuqiPlus/ACEngine-Client/issues) 提交 Python 版本、SDK 版本、错误信息及可复现的示例。请勿附上 API-Key、Secret 或登录令牌。

@@ -22,7 +22,7 @@
 
 这条方式使用 GitHub 的短期身份认证，不需要把 PyPI 密码或长期上传 Token 放进仓库。
 
-## 获得推送与发布授权后
+## 发布版本
 
 1. 核对版本号、CHANGELOG 与构建内容，确保 SDK 和 `.github/workflows/publish.yml` 已配套提交到 `main`。
 2. 在 GitHub Actions 选择 **Publish to PyPI** → **Run workflow**，分支选择 `main`，版本填写 `0.2.0`。
